@@ -12,6 +12,10 @@ page.onConsoleMessage = function(msg){
 	console.log(msg);
 };
 
+page.onResourceError = function(re){
+	console.log(re.url + ":" + re.errorString);
+}
+
 page.onError = function(msg,trace){
 	var msgStack = ["ERROR:" + msg];
 	if(trace && trace.length){
