@@ -27,7 +27,7 @@ page.onError = function(msg,trace){
 	console.log(msgStack.join("\n"));
 };
 
-page.open("https://wx.qq.com/",function(status){
+page.open("https://wx.qq.com",function(status){
 	if(status != "success"){
 		console.log("open error:" + status)
 		return;
