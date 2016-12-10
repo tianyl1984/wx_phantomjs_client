@@ -40,8 +40,6 @@ page.open("https://wx.qq.com",function(status){
 	console.log(title);
 });
 
-
-
 var webserver = require("webserver");
 var server = webserver.create();
 var service = server.listen(8083, function(request,response){
@@ -55,6 +53,9 @@ var service = server.listen(8083, function(request,response){
 	}else{
 		msg = "error action";
 	}
+	if(!(typeof msg === "string")){
+		msg = JSON.stringify(msg);
+	}
 	response.write("<html><body>" + msg + "</body></html>");
 	response.close();
 });
@@ -63,6 +64,40 @@ var actions = {
 	"screenshot":function(){
 		var base64 = page.renderBase64("PNG");
 		return "<img src='data:image/png;base64," + base64 + "'><script>setTimeout('window.location.reload()',4000)</script>";
+	},
+	"selectChat":function(){
+		page.sendEvent("click",150,190);
+		return "ok";
+	},
+	"getData":function(){
+		var pos = page.evaluate(function(){
+			var pos = null;
+			$(".nickname_text").each(function(){
+				var name = $(this).text();
+				if(name == "sender"){
+					pos = $(this).offset();
+				}
+			});
+			if(pos == null){
+				return null;
+			}
+			return {"left":pos.left+1,"top":pos.top+1};
+		});
+		if(pos == null){
+			return null;
+		}
+		page.sendEvent("click",pos.left+1,pos.top+1);
+		return page.evaluate(function(){
+			var json = [];
+			$("#chatArea a[class=app]").each(function(){
+				var title = $(this).find("h4").text();
+				var orgUrl = $(this).attr("href");
+				var url = decodeURIComponent(orgUrl.substring(orgUrl.indexOf("equrl=")+6));
+				url = url.substring(0,url.indexOf("#rd"));
+				json.push({title:title,url:url});
+			});
+			return json;
+		});
 	},
 	"":function(){
 		return "no action";
